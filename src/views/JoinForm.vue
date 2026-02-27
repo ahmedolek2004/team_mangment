@@ -9,22 +9,30 @@
       <form @submit.prevent="handleSubmit" class="p-8 space-y-6">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">الاسم بالكامل</label>
-          <input v-model="form.name" type="text" required class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+          <input v-model="form.name" type="text" required
+            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
         </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">الرقم الجامعي</label>
-          <input v-model="form.studentId" type="text" required class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+          <input v-model="form.studentId" type="text" required
+            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
 
-
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">رقم الهاتف</label>
+          <input v-model="form.phoneNumber" type="text" required
+            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">المهارات (Frontend, Python, etc.)</label>
-          <textarea v-model="form.skills" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+          <textarea v-model="form.skills" rows="3"
+            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
         </div>
 
-        <button type="submit" :disabled="loading" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400">
+        <button type="submit" :disabled="loading"
+          class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400">
           {{ loading ? 'جاري الإرسال...' : 'إرسال الطلب' }}
         </button>
       </form>
@@ -60,6 +68,7 @@ const handleSubmit = async () => {
       studentName: form.value.name,
       universityId: form.value.studentId,
       skills: form.value.skills,
+      phoneNumber: form.value.phoneNumber,
       status: 'pending', // حالة أولية للطلب
       createdAt: serverTimestamp() // وقت التقديم الفعلي
     })
