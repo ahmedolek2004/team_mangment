@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { db, auth } from '../firebase'
 import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, orderBy, where, arrayUnion, Timestamp } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -8,31 +8,46 @@ const tasks = ref([])
 const userRole = ref('student')
 const currentUserId = ref(null)
 const newComments = ref({}) // متغير للتعليقات الجديدة لكل مهمة
+let unsubscribe = null // لإلغاء الاشتراك السابق
 
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      currentUserId.value = user.id || user.uid
+      currentUserId.value = user.uid
       // جلب دور المستخدم
-      onSnapshot(doc(db, "users", user.uid), (d) => { if (d.exists()) userRole.value = d.data().role })
-
-      // استعلام المهام: يظهر للمستخدم مهامه الخاصة + المهام المرسلة للكل
-      let q;
-      if (userRole.value === 'admin') {
-        q = query(collection(db, "tasks"), orderBy("createdAt", "desc"))
-      } else {
-        q = query(
-          collection(db, "tasks"),
-          where("studentId", "in", [user.uid, 'all']), // فلترة المهام لي فقط أو للكل
-          orderBy("createdAt", "desc")
-        )
-      }
-
-      onSnapshot(q, (snapshot) => {
-        tasks.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      onSnapshot(doc(db, "users", user.uid), (d) => {
+        if (d.exists()) {
+          userRole.value = d.data().role
+        }
       })
     }
   })
+})
+
+// مراقبة تغيير الدور أو المستخدم لإعادة إنشاء الاستعلام
+watch([userRole, currentUserId], () => {
+  if (currentUserId.value) {
+    // إلغاء الاشتراك السابق إذا كان موجوداً
+    if (unsubscribe) {
+      unsubscribe()
+    }
+
+    // إنشاء الاستعلام الجديد
+    let q;
+    if (userRole.value === 'admin') {
+      q = query(collection(db, "tasks"), orderBy("createdAt", "desc"))
+    } else {
+      q = query(
+        collection(db, "tasks"),
+        where("studentId", "in", [currentUserId.value, 'all']), // فلترة المهام لي فقط أو للكل
+        orderBy("createdAt", "desc")
+      )
+    }
+
+    unsubscribe = onSnapshot(q, (snapshot) => {
+      tasks.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    })
+  }
 })
 
 // تحديث حالة المهمة (Workflow)
@@ -99,7 +114,7 @@ const addComment = async (taskId) => {
                   {{ getStatusInfo(task.status).label }}
                 </span>
                 <span class="text-xs font-bold px-2 py-1 bg-blue-50 text-blue-600 rounded-lg">💬 {{ task.commMethod
-                }}</span>
+                  }}</span>
               </div>
               <h3 class="text-xl font-black text-gray-800">{{ task.title }}</h3>
               <p class="text-gray-500 text-sm mt-1 leading-relaxed">{{ task.description }}</p>
