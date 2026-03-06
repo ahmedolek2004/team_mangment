@@ -12,7 +12,8 @@ const task = ref({
   priority: 'عادية',
   commMethod: 'واتساب',
   status: 'pending', // (pending, working, review, completed)
-  completed: false
+  completed: false,
+  comments: [] // مصفوفة التعليقات الفارغة
 })
 const loading = ref(false)
 
@@ -26,7 +27,7 @@ const submitTask = async () => {
   try {
     await addDoc(collection(db, "tasks"), { ...task.value, createdAt: serverTimestamp() })
     alert("🚀 تم نشر المهمة بنجاح!")
-    task.value = { title: '', description: '', studentId: '', dueDate: '', priority: 'عادية', commMethod: 'واتساب', status: 'pending', completed: false }
+    task.value = { title: '', description: '', studentId: '', dueDate: '', priority: 'عادية', commMethod: 'واتساب', status: 'pending', completed: false, comments: [] }
   } finally { loading.value = false }
 }
 </script>
@@ -63,9 +64,11 @@ const submitTask = async () => {
         </select>
       </div>
 
-      <textarea v-model="task.description" placeholder="وصف المهمة وطريقة التنفيذ..." class="custom-input h-32 pt-3" required></textarea>
+      <textarea v-model="task.description" placeholder="وصف المهمة وطريقة التنفيذ..." class="custom-input h-32 pt-3"
+        required></textarea>
 
-      <button :disabled="loading" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-95">
+      <button :disabled="loading"
+        class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-95">
         {{ loading ? 'جاري الحفظ...' : 'نشر المهمة للمكلفين 🚀' }}
       </button>
     </form>
@@ -77,17 +80,24 @@ const submitTask = async () => {
 .custom-input {
   width: 100%;
   padding: 1rem;
-  background-color: #f9fafb; /* bg-gray-50 */
-  border: 1px solid #f3f4f6; /* border-gray-100 */
-  border-radius: 0.75rem;     /* rounded-xl */
+  background-color: #f9fafb;
+  /* bg-gray-50 */
+  border: 1px solid #f3f4f6;
+  /* border-gray-100 */
+  border-radius: 0.75rem;
+  /* rounded-xl */
   outline: none;
   transition: all 0.2s;
-  font-size: 0.875rem;        /* text-sm */
-  font-weight: 700;           /* font-bold */
+  font-size: 0.875rem;
+  /* text-sm */
+  font-weight: 700;
+  /* font-bold */
 }
 
 .custom-input:focus {
-  border-color: #60a5fa;     /* focus:border-blue-400 */
-  background-color: white;    /* focus:bg-white */
+  border-color: #60a5fa;
+  /* focus:border-blue-400 */
+  background-color: white;
+  /* focus:bg-white */
 }
 </style>
